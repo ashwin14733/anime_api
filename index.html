@@ -1,0 +1,199 @@
+ 
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AnimeFind</title>
+  <style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    body{
+        font-family: Arial; 
+        padding: 20px; 
+        color: white;
+        background-color: black;
+        /* background: url("https://c4.wallpaperflare.com/wallpaper/981/482/476/anime-4k-image-download-hd-wallpaper-preview.jpg");
+        background-repeat: no-repeat;
+        background-size: cover; */
+
+    }
+    .anime-card{
+        border: 1px solid #ccc; 
+        margin: 10px; 
+        padding: 10px; 
+        display: flex; 
+    }
+    img{
+        width: 100px; 
+        margin-right: 10px; 
+    }
+    h1{
+        color: rgb(194, 226, 9);
+        /* color: aqua; */
+        font-size: 45px;
+        text-align: center;
+    }
+    .info{
+        text-align: center;
+
+    }
+    .maininfo{
+        width: 95%;
+        margin-left: auto;
+        margin-right: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        /* gap: 600px; */
+        background-color: black;
+        padding: 10px 0px;
+        position: sticky;
+        top: 0;
+    }
+    .searchip{
+        padding: 10px 20px;
+        padding-right: 80px;
+        border-radius: 20px;
+        border: none;
+        font-size: 16px;
+        /* color: rgb(194, 226, 9); */
+        color: white;
+        background-color: gray;
+        outline: none;
+    }
+    .searchip::placeholder{
+        color: black;
+    }
+    button{
+        padding: 10px 15px;
+        font-size: 16px;
+        color: black;
+        background-color: rgb(194, 226, 9);
+        /* background-color: aqua; */
+        /* background-color: rgb(228, 0, 0); */
+        border: none;
+        border-radius: 20px;
+        opacity: 0.8;
+        cursor: pointer;
+        
+
+    }
+    button:hover{
+        opacity: 1;
+    }
+    .ip-button{
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+    #results{
+        padding: 50px ;
+    }
+   
+  </style>
+</head>
+<body>
+    <div class="info">
+        <div class="maininfo">
+            <h1>Anime Info App</h1>
+            <div class="ip-button">
+                <input type="text" id="search" placeholder="Search Your Anime..." class="searchip">
+                <button onclick="searchAnime()">Search</button>
+            </div>
+        </div>
+        <div id="results"></div>
+    </div>
+
+  <script>
+    async function searchAnime() {
+      const query = document.getElementById('search').value;
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${query}`);
+      const data = await res.json();
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+      data.data.forEach(anime => {
+        container.innerHTML += `
+          <div class="anime-card">
+            <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+            <div>
+              <h3>${anime.title}</h3>
+              <p>${anime.synopsis?.substring(0, 150)}...</p>
+              <a href="${anime.url}" target="_blank">More Info</a>
+            </div>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
+
+<!-- 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Anime Info App</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
+    input, button { padding: 10px; font-size: 16px; margin: 10px 0; width: 100%; }
+    .anime-list { display: flex; flex-wrap: wrap; gap: 15px; }
+    .anime-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      width: 250px;
+      overflow: hidden;
+    }
+    .anime-card img { width: 100%; height: auto; }
+    .anime-info { padding: 10px; }
+    .anime-info h3 { font-size: 18px; margin: 0 0 5px; }
+    .anime-info p { font-size: 14px; color: #555; height: 60px; overflow: hidden; }
+    .anime-info a { text-decoration: none; color: #0077cc; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>🔎 Search Anime Info</h2>
+  <input type="text" id="searchInput" placeholder="Enter anime title (e.g., One Piece)">
+  <button onclick="searchAnime()">Search</button>
+
+  <div id="animeResults" class="anime-list"></div>
+
+  <script>
+    async function searchAnime() {
+      const query = document.getElementById('searchInput').value.trim();
+      const resultsContainer = document.getElementById('animeResults');
+      resultsContainer.innerHTML = '';
+
+      if (!query) return;
+
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
+      const data = await res.json();
+
+      if (!data.data || data.data.length === 0) {
+        resultsContainer.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+
+      data.data.forEach(anime => {
+        resultsContainer.innerHTML += `
+          <div class="anime-card">
+            <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+            <div class="anime-info">
+              <h3>${anime.title}</h3>
+              <p>${anime.synopsis ? anime.synopsis.slice(0, 100) + '...' : 'No synopsis available'}</p>
+              <a href="${anime.url}" target="_blank">View on MAL</a>
+            </div>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html> -->
+
+
+
+
