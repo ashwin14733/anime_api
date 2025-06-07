@@ -1,199 +1,425 @@
- 
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AnimeFind</title>
-  <style>
-    *{
-        margin: 0;
-        padding: 0;
-    }
-    body{
-        font-family: Arial; 
-        padding: 20px; 
-        color: white;
-        background-color: black;
-        /* background: url("https://c4.wallpaperflare.com/wallpaper/981/482/476/anime-4k-image-download-hd-wallpaper-preview.jpg");
-        background-repeat: no-repeat;
-        background-size: cover; */
-
-    }
-    .anime-card{
-        border: 1px solid #ccc; 
-        margin: 10px; 
-        padding: 10px; 
-        display: flex; 
-    }
-    img{
-        width: 100px; 
-        margin-right: 10px; 
-    }
-    h1{
-        color: rgb(194, 226, 9);
-        /* color: aqua; */
-        font-size: 45px;
-        text-align: center;
-    }
-    .info{
-        text-align: center;
-
-    }
-    .maininfo{
-        width: 95%;
-        margin-left: auto;
-        margin-right: auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        /* gap: 600px; */
-        background-color: black;
-        padding: 10px 0px;
-        position: sticky;
-        top: 0;
-    }
-    .searchip{
-        padding: 10px 20px;
-        padding-right: 80px;
-        border-radius: 20px;
-        border: none;
-        font-size: 16px;
-        /* color: rgb(194, 226, 9); */
-        color: white;
-        background-color: gray;
-        outline: none;
-    }
-    .searchip::placeholder{
-        color: black;
-    }
-    button{
-        padding: 10px 15px;
-        font-size: 16px;
-        color: black;
-        background-color: rgb(194, 226, 9);
-        /* background-color: aqua; */
-        /* background-color: rgb(228, 0, 0); */
-        border: none;
-        border-radius: 20px;
-        opacity: 0.8;
-        cursor: pointer;
-        
-
-    }
-    button:hover{
-        opacity: 1;
-    }
-    .ip-button{
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 30px;
-    }
-    #results{
-        padding: 50px ;
-    }
-   
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Info API</title>
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div class="info">
-        <div class="maininfo">
-            <h1>Anime Info App</h1>
-            <div class="ip-button">
-                <input type="text" id="search" placeholder="Search Your Anime..." class="searchip">
-                <button onclick="searchAnime()">Search</button>
-            </div>
-        </div>
-        <div id="results"></div>
-    </div>
+    <div class="main">
+            <nav>
+                <div class="header">
+                    <h1>Animext</h1>
+                    <button class="login">Login</button>
+                </div>
+            </nav>
+            <section>
+                <div class="mainsection">
+                    <div class="left-section">
+                        <p class="your" id="element">Your Gateway to the Anime Universe</p>
+                        <p class="acc">Access thousands of anime titles, characters, and episodes through our lightning-fast API designed for developers who actually understand anime culture.</p>
+                        <div class="search">
+                            <input type="search" placeholder="Search Your Anime..." id="searchInput"  >
+                            <label for="searchinput" class="sr-only">Search for Anime</label>
+                            <!-- <img src="./ic_round-search.png" onclick="searchAnime()" alt=""> -->
+                            <button class="search-btn" onclick="searchAnime()">Search</button>
+                        </div>
+                        <div class="buttons">
+                            <p class="popular">Popular Tags : </p>
+                            <button class="one">One Piece</button>
+                            <button class="one">Jujutsu Kaisen</button>
+                            <button class="one"> Vinland Saga</button>
+                            <button class="one">Monster</button>
+                        </div>
+                    </div>
+                    <div class="right-section">
+                        <img src="https://static.wikitide.net/greatcharacterswiki/thumb/2/22/Ichigo_Pre-Timeskip.png/1200px-Ichigo_Pre-Timeskip.png" alt="" class="hero-image" >
+                        <!-- <img src="https://www.pngplay.com/wp-content/uploads/12/Hisoka-Background-PNG.png" alt="" width="100%"> -->                     
+                    </div>
+                </div>
+            </section>
+            <section class="result-section">
+                <div id="resultsContainer" style="display: none;">
+                    <div class="results-header">
+                        <h2 class="results-title">Search Results</h2>
+                        <p class="results-count" id="resultsCount"></p>
+                    </div>
+                    <div id="animeResults" class="anime-list" role="list"></div>
+                </div>
+                <!-- <div id="animeResults" class="anime-list"></div> -->
 
+            </section>
+     </div>
+    <script>
+                // Global variables
+            let currentSearchResults = [];
+            let isLoading = false;
+
+            // DOM elements
+            const searchInput = document.getElementById('searchInput');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const animeResults = document.getElementById('animeResults');
+            const resultsCount = document.getElementById('resultsCount');
+
+            // Initialize the application
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeEventListeners();
+                setupPopularTags();
+            });
+
+            // Event listeners setup
+            function initializeEventListeners() {
+                // Search input enter key handler
+                searchInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        searchAnime();
+                    }
+                });
+
+                // Login button handler
+                const loginBtn = document.querySelector('.login');
+                loginBtn.addEventListener('click', handleLogin);
+            }
+
+            // Setup popular tag buttons
+            function setupPopularTags() {
+                const tagButtons = document.querySelectorAll('.one');
+                tagButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const tagText = this.textContent.trim();
+                        searchInput.value = tagText;
+                        searchAnime();
+                    });
+                });
+            }
+
+            // Main search function
+            async function searchAnime() {
+                const query = searchInput.value.trim();
+                
+                if (!query) {
+                    showMessage('Please enter an anime name to search!', 'error');
+                    return;
+                }
+
+                if (isLoading) return;
+
+                try {
+                    setLoadingState(true);
+                    showMessage('Searching for anime...', 'loading');
+                    
+                    const results = await fetchAnimeData(query);
+                    
+                    if (results && results.length > 0) {
+                        displayResults(results);
+                        currentSearchResults = results;
+                    } else {
+                        showMessage('No anime found matching your search. Try different keywords!', 'empty');
+                    }
+                    
+                } catch (error) {
+                    console.error('Search error:', error);
+                    showMessage('Something went wrong while searching. Please try again!', 'error');
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+
+            // Fetch anime data from API
+            async function fetchAnimeData(query) {
+                const apiUrl = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=20`;
+                
+                try {
+                    const response = await fetch(apiUrl);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.data || [];
+                    
+                } catch (error) {
+                    // Fallback to mock data if API fails
+                    console.warn('API request failed, using mock data:', error);
+                    return getMockAnimeData(query);
+                }
+            }
+
+            // Mock data for demonstration/fallback
+            function getMockAnimeData(query) {
+                const mockData = [
+                    {
+                        mal_id: 1,
+                        title: "One Piece",
+                        images: {
+                            jpg: {
+                                large_image_url: "https://cdn.myanimelist.net/images/anime/6/73245l.jpg"
+                            }
+                        },
+                        synopsis: "Follows the adventures of Monkey D. Luffy and his pirate crew in order to find the greatest treasure ever left by the legendary Pirate Gold Roger.",
+                        score: 9.0,
+                        episodes: 1000,
+                        status: "Currently Airing",
+                        url: "https://myanimelist.net/anime/21/One_Piece"
+                    },
+                    {
+                        mal_id: 2,
+                        title: "Naruto",
+                        images: {
+                            jpg: {
+                                large_image_url: "https://cdn.myanimelist.net/images/anime/13/17405l.jpg"
+                            }
+                        },
+                        synopsis: "Naruto Uzumaki, a mischievous adolescent ninja, struggles as he searches for recognition and dreams of becoming the Hokage, the village's leader.",
+                        score: 8.3,
+                        episodes: 720,
+                        status: "Finished Airing",
+                        url: "https://myanimelist.net/anime/20/Naruto"
+                    },
+                    {
+                        mal_id: 3,
+                        title: "Attack on Titan",
+                        images: {
+                            jpg: {
+                                large_image_url: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg"
+                            }
+                        },
+                        synopsis: "Humanity fights for survival against giant humanoid Titans that have brought civilization to the brink of extinction.",
+                        score: 9.0,
+                        episodes: 87,
+                        status: "Finished Airing",
+                        url: "https://myanimelist.net/anime/16498/Shingeki_no_Kyojin"
+                    }
+                ];
+
+                // Filter mock data based on query
+                return mockData.filter(anime => 
+                    anime.title.toLowerCase().includes(query.toLowerCase())
+                );
+            }
+
+            // Display search results
+            function displayResults(results) {
+                resultsContainer.style.display = 'block';
+                resultsCount.textContent = `Found ${results.length} anime${results.length !== 1 ? 's' : ''}`;
+                
+                animeResults.innerHTML = '';
+                
+                results.forEach((anime, index) => {
+                    const animeCard = createAnimeCard(anime, index);
+                    animeResults.appendChild(animeCard);
+                });
+
+                // Smooth scroll to results
+                resultsContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+
+            // Create individual anime card
+            function createAnimeCard(anime, index) {
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const imageUrl = anime.images?.jpg?.large_image_url || 
+                                anime.images?.jpg?.image_url || 
+                                'https://via.placeholder.com/300x400?text=No+Image';
+                
+                const title = anime.title || anime.title_english || 'Unknown Title';
+                const synopsis = anime.synopsis ? 
+                                (anime.synopsis.length > 200 ? 
+                                anime.synopsis.substring(0, 200) + '...' : 
+                                anime.synopsis) : 
+                                'No synopsis available.';
+                
+                const score = anime.score ? `★ ${anime.score}` : 'Not rated';
+                const episodes = anime.episodes ? `${anime.episodes} episodes` : 'Episodes unknown';
+                const status = anime.status || 'Status unknown';
+                
+                card.innerHTML = `
+                    <img src="${imageUrl}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'">
+                    <div class="anime-info">
+                        <h3 class="anime-title">${title}</h3>
+                        <div class="anime-details">
+                            <p style="color: #f7931e; margin-bottom: 5px;">${score} • ${episodes}</p>
+                            <p style="color: #00bcd4; margin-bottom: 10px; font-size: 14px;">${status}</p>
+                        </div>
+                        <p class="anime-synopsis">${synopsis}</p>
+                        <a href="${anime.url || '#'}" target="_blank" class="anime-link" rel="noopener noreferrer">
+                            View on MAL
+                        </a>
+                    </div>
+                `;
+                
+                return card;
+            }
+
+            // Show loading/error/empty messages
+            function showMessage(message, type = 'info') {
+                resultsContainer.style.display = 'block';
+                resultsCount.textContent = '';
+                
+                const messageClass = type === 'error' ? 'error-message' : 
+                                type === 'empty' ? 'empty-message' : 
+                                'message';
+                
+                animeResults.innerHTML = `
+                    <div class="${messageClass} message">
+                        <p>${message}</p>
+                    </div>
+                `;
+                
+                if (type !== 'loading') {
+                    resultsContainer.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }
+
+            // Set loading state
+            function setLoadingState(loading) {
+                isLoading = loading;
+                const searchBtn = document.querySelector('.search-btn');
+                
+                if (loading) {
+                    searchBtn.textContent = 'Searching...';
+                    searchBtn.disabled = true;
+                    searchInput.disabled = true;
+                } else {
+                    searchBtn.textContent = 'Search';
+                    searchBtn.disabled = false;
+                    searchInput.disabled = false;
+                }
+            }
+
+            // Handle login button click
+            function handleLogin() {
+                alert('Login functionality coming soon! 🚀\n\nThis would typically redirect to a login page or open a modal.');
+            }
+
+            // Utility function to debounce search (optional enhancement)
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Optional: Auto-search with debouncing
+            const debouncedSearch = debounce(() => {
+                if (searchInput.value.trim().length > 2) {
+                    searchAnime();
+                }
+            }, 300);
+
+            // Optional: Enable live search (uncomment to activate)
+            // searchInput.addEventListener('input', debouncedSearch);
+
+            // Handle image loading errors globally
+            document.addEventListener('error', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.target.src = 'https://via.placeholder.com/300x400?text=Image+Not+Found';
+                }
+            }, true);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(event) {
+                // Ctrl/Cmd + K to focus search
+                if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                    event.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                
+                // Escape to clear search
+                if (event.key === 'Escape') {
+                    if (document.activeElement === searchInput) {
+                        searchInput.blur();
+                    } else {
+                        clearSearch();
+                    }
+                }
+            });
+
+            // Clear search function
+            function clearSearch() {
+                searchInput.value = '';
+                resultsContainer.style.display = 'none';
+                currentSearchResults = [];
+            }
+
+            // Console welcome message
+            console.log(`
+            🎌 Animext API Console
+            ===================
+            Welcome to Animext! Here are some useful commands:
+            - searchAnime(): Trigger search programmatically
+            - clearSearch(): Clear current search results
+            - currentSearchResults: View current search data
+
+            Happy anime hunting! ✨
+            `);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <!-- Element to contain animated typing -->
+  
+
+  <!-- Load library from the CDN -->
+  <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+
+  <!-- Setup and start animation! -->
   <script>
-    async function searchAnime() {
-      const query = document.getElementById('search').value;
-      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${query}`);
-      const data = await res.json();
-      const container = document.getElementById('results');
-      container.innerHTML = '';
-      data.data.forEach(anime => {
-        container.innerHTML += `
-          <div class="anime-card">
-            <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
-            <div>
-              <h3>${anime.title}</h3>
-              <p>${anime.synopsis?.substring(0, 150)}...</p>
-              <a href="${anime.url}" target="_blank">More Info</a>
-            </div>
-          </div>
-        `;
-      });
-    }
+    var typed = new Typed('#element', {
+      strings: [ "Your Gateway to the Anime Universe", "Unleash the Anime Multiverse", 'The API That Gets Your Anime Obsession'],
+      typeSpeed: 50,
+      loop : true,
+    });
   </script>
+</body>
+  
 </body>
 </html>
 
-<!-- 
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Anime Info App</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-    input, button { padding: 10px; font-size: 16px; margin: 10px 0; width: 100%; }
-    .anime-list { display: flex; flex-wrap: wrap; gap: 15px; }
-    .anime-card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      width: 250px;
-      overflow: hidden;
-    }
-    .anime-card img { width: 100%; height: auto; }
-    .anime-info { padding: 10px; }
-    .anime-info h3 { font-size: 18px; margin: 0 0 5px; }
-    .anime-info p { font-size: 14px; color: #555; height: 60px; overflow: hidden; }
-    .anime-info a { text-decoration: none; color: #0077cc; font-size: 14px; }
-  </style>
-</head>
-<body>
-  <h2>🔎 Search Anime Info</h2>
-  <input type="text" id="searchInput" placeholder="Enter anime title (e.g., One Piece)">
-  <button onclick="searchAnime()">Search</button>
-
-  <div id="animeResults" class="anime-list"></div>
-
-  <script>
-    async function searchAnime() {
-      const query = document.getElementById('searchInput').value.trim();
-      const resultsContainer = document.getElementById('animeResults');
-      resultsContainer.innerHTML = '';
-
-      if (!query) return;
-
-      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
-      const data = await res.json();
-
-      if (!data.data || data.data.length === 0) {
-        resultsContainer.innerHTML = '<p>No results found.</p>';
-        return;
-      }
-
-      data.data.forEach(anime => {
-        resultsContainer.innerHTML += `
-          <div class="anime-card">
-            <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
-            <div class="anime-info">
-              <h3>${anime.title}</h3>
-              <p>${anime.synopsis ? anime.synopsis.slice(0, 100) + '...' : 'No synopsis available'}</p>
-              <a href="${anime.url}" target="_blank">View on MAL</a>
-            </div>
-          </div>
-        `;
-      });
-    }
-  </script>
-</body>
-</html> -->
 
 
+ 
 
+<!-- async function searchAnime() {
+    //   const query = document.getElementById('searchInput').value.trim();
+    //   const resultsContainer = document.getElementById('animeResults');
+    //   resultsContainer.innerHTML = '';
 
+    //   if (!query) return;
+
+    //   const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10`);
+    //   const data = await res.json();
+
+    //   if (!data.data || data.data.length === 0) {
+    //     resultsContainer.innerHTML = '<p>No results found.</p>';
+    //     return;
+    //   }
+
+    //   data.data.forEach(anime => {
+    //     resultsContainer.innerHTML += `
+    //       <div class="anime-card">
+    //         <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+    //         <div class="anime-info">
+    //           <h3>${anime.title}</h3>
+    //           <p>${anime.synopsis ? anime.synopsis.slice(0, 100) + '...' : 'No synopsis available'}</p>
+    //           <a href="${anime.url}" target="_blank">View on MAL</a>
+    //         </div>
+    //       </div>
+    //     `;
+    //   });
+    // } -->
