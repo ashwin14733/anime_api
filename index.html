@@ -11,13 +11,15 @@
             <nav>
                 <div class="header">
                     <h1>Animext</h1>
-                    <button class="login">Login</button>
+                    <button class="login" id="loginbtn">Login</button>
                 </div>
             </nav>
             <section>
                 <div class="mainsection">
                     <div class="left-section">
-                        <p class="your" id="element">Your Gateway to the Anime Universe</p>
+                        <div class="container">
+                            <p class="your" id="element"></p>
+                        </div>
                         <p class="acc">Access thousands of anime titles, characters, and episodes through our lightning-fast API designed for developers who actually understand anime culture.</p>
                         <div class="search">
                             <input type="search" placeholder="Search Your Anime..." id="searchInput"  >
@@ -58,6 +60,7 @@
 
             // DOM elements
             const searchInput = document.getElementById('searchInput');
+            const loggedin = document.getElementById("loginbtn");
             const resultsContainer = document.getElementById('resultsContainer');
             const animeResults = document.getElementById('animeResults');
             const resultsCount = document.getElementById('resultsCount');
@@ -68,6 +71,7 @@
                 setupPopularTags();
             });
 
+            
             // Event listeners setup
             function initializeEventListeners() {
                 // Search input enter key handler
@@ -100,7 +104,17 @@
                 const query = searchInput.value.trim();
                 
                 if (!query) {
-                    showMessage('Please enter an anime name to search!', 'error');
+                    Swal.fire({
+                        title : "Please Enter Anime Name",
+                        icon : "info",
+                        draggable : "true",
+                        background : "rgba(255,225,225,0.1)",
+                        color : '#ffffff',
+                        backdrop : `
+                        rgba(0 , 0 , 0 , 1)`
+
+                    })
+                    // showMessage('Please enter an anime name to search!', 'error');
                     return;
                 }
 
@@ -235,11 +249,12 @@
                                 (anime.synopsis.length > 200 ? 
                                 anime.synopsis.substring(0, 200) + '...' : 
                                 anime.synopsis) : 
-                                'No synopsis available.';
+                                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi quo consectetur ipsa sequi, sint dignissimos..';
                 
                 const score = anime.score ? `★ ${anime.score}` : 'Not rated';
                 const episodes = anime.episodes ? `${anime.episodes} episodes` : 'Episodes unknown';
                 const status = anime.status || 'Status unknown';
+               
                 
                 card.innerHTML = `
                     <img src="${imageUrl}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'">
@@ -249,7 +264,7 @@
                             <p style="color: #f7931e; margin-bottom: 5px;">${score} • ${episodes}</p>
                             <p style="color: #00bcd4; margin-bottom: 10px; font-size: 14px;">${status}</p>
                         </div>
-                        <p class="anime-synopsis">${synopsis}</p>
+                        <p class="anime-synopsis">${synopsis} </p>
                         <a href="${anime.url || '#'}" target="_blank" class="anime-link" rel="noopener noreferrer">
                             View on MAL
                         </a>
@@ -373,7 +388,8 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
       <!-- Element to contain animated typing -->
-  
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
   <!-- Load library from the CDN -->
   <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
